@@ -1,9 +1,11 @@
 package com.example.fu_iems;
 
+import android.annotation.SuppressLint;
 import android.app.DownloadManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.view.WindowManager;
 import android.webkit.CookieManager;
 import android.webkit.DownloadListener;
 import android.webkit.URLUtil;
@@ -20,7 +22,7 @@ import androidx.core.view.WindowInsetsCompat;
 public class MainActivity extends AppCompatActivity {
 
     WebView webView;
-
+    @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         webView = findViewById(R.id.webView);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.loadUrl("https://fuiems.pipilikasoft.com/");
@@ -39,9 +43,12 @@ public class MainActivity extends AppCompatActivity {
         webView.getSettings().setUseWideViewPort(true);
         webView.getSettings().setSupportZoom(false);
         webView.getSettings().setBuiltInZoomControls(true);
-        webView.setWillNotCacheDrawing(true);
         webView.getSettings().setDomStorageEnabled(true);
         webView.setWebViewClient(new WebViewClient());
+
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.setAcceptCookie(true);
+        cookieManager.setAcceptThirdPartyCookies(webView, true);
 
         webView.setDownloadListener(new DownloadListener() {
             @Override
@@ -64,6 +71,8 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "Downloading Started...", Toast.LENGTH_SHORT).show();
             }
         });
+
+        syncCookies();
     }
 
     @Override
@@ -74,5 +83,12 @@ public class MainActivity extends AppCompatActivity {
             super.onBackPressed();
             finish();
         }
+    }
+
+    private void syncCookies() {
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.setAcceptCookie(true);
+        cookieManager.setAcceptThirdPartyCookies(webView, true);
+        cookieManager.flush();
     }
 }
